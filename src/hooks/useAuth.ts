@@ -15,6 +15,7 @@ interface AuthState {
   register: (data: RegisterType) => void;
   login: (data: LoginType) => void;
   logout: () => void;
+  isAuthStatus: () => void;
 }
 
 export const useAuth = create<AuthState>()(
@@ -80,10 +81,9 @@ export const useAuth = create<AuthState>()(
       isAuthStatus: async () => {
         set({ isAuthStatusLoading: true });
         try {
-          const response = await API.get("/auth/me");
+          const response = await API.get("/auth/status");
           set({ user: response.data.user });
           useSocket.getState().connectSocket();
-          toast.success("Authentication successful");
         } catch (error: unknown) {
           if (axios.isAxiosError(error)) {
             toast.error(error.response?.data.message);

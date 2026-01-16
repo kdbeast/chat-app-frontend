@@ -29,7 +29,7 @@ export const useSocket = create<SocketState>()((set, get) => ({
       console.log("Connected to socket", newSocket.id);
     });
 
-    newSocket.on("online:users", (userIds) => {
+    newSocket.on("onlineUsers", (userIds) => {
       console.log("Online users", userIds);
       set({ onlineUsers: userIds });
     });
