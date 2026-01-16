@@ -1,7 +1,7 @@
-import { ComponentExample } from "@/components/component-example";
+import AppRoutes from "./routes";
 
 export function App() {
-return <ComponentExample />;
+return <AppRoutes />;
 }
 
 export default App;
