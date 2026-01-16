@@ -1,16 +1,18 @@
 import { z } from "zod";
 import {
+  Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Link } from "react-router";
 import Logo from "@/components/logo";
 import { useForm } from "react-hook-form";
-import { Form, Link } from "react-router";
-import { useAuth } from "../../hooks/useAuth";
-import { Button, Input } from "@base-ui/react";
+import { useAuth } from "@/hooks/useAuth";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -3,7 +3,7 @@ import axios from "axios";
 export const API = axios.create({
   baseURL:
     import.meta.env.MODE === "development"
-      ? import.meta.env.VITE_BASE_URL
+      ? `${import.meta.env.VITE_BASE_URL}/api`
       : "/api",
   withCredentials: true,
 });

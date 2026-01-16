@@ -31,6 +31,7 @@ export const useAuth = create<AuthState>()(
           const response = await API.post("/auth/register", data);
           set({ user: response.data.user });
           useSocket.getState().connectSocket();
+          toast.success("Registration successful");
         } catch (error: unknown) {
           if (axios.isAxiosError(error)) {
             toast.error(error.response?.data.message);
@@ -48,6 +49,7 @@ export const useAuth = create<AuthState>()(
           const response = await API.post("/auth/login", data);
           set({ user: response.data.user });
           useSocket.getState().connectSocket();
+          toast.success("Login successful");
         } catch (error: unknown) {
           if (axios.isAxiosError(error)) {
             toast.error(error.response?.data.message);
@@ -65,6 +67,7 @@ export const useAuth = create<AuthState>()(
 
           set({ user: null });
           useSocket.getState().disconnectSocket();
+          toast.success("Logout successful");
         } catch (error: unknown) {
           if (axios.isAxiosError(error)) {
             toast.error(error.response?.data.message);
@@ -80,6 +83,7 @@ export const useAuth = create<AuthState>()(
           const response = await API.get("/auth/me");
           set({ user: response.data.user });
           useSocket.getState().connectSocket();
+          toast.success("Authentication successful");
         } catch (error: unknown) {
           if (axios.isAxiosError(error)) {
             toast.error(error.response?.data.message);

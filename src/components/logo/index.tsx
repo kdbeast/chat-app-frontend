@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import logoSvg from "@/assets/whop-logo.svg";
+import logoSvg from "@/assets/images.jpeg";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -12,14 +12,14 @@ interface LogoProps {
 const Logo = ({
   url = "/",
   showText = true,
-  imgClass = "size-[30px]",
-  textClass,
+  textClass = "text-[24px]",
+  imgClass = "size-[40px] rounded-full",
 }: LogoProps) => (
   <Link to={url} className="flex items-center gap-2 w-fit">
-    <img src={logoSvg} alt="Whop" className={cn(imgClass)} />
+    <img src={logoSvg} alt="TalkBridge" className={cn(imgClass)} />
     {showText && (
       <span className={cn("font-semibold text-lg leading-tight", textClass)}>
-        Whop.
+        TalkBridge
       </span>
     )}
   </Link>
