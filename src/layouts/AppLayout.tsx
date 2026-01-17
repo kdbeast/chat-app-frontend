@@ -1,11 +1,17 @@
 import { Outlet } from "react-router";
 import AppWrapper from "@/components/AppWrapper";
+import ChatList from "@/components/chat/ChatList";
 
 const AppLayout = () => {
   return (
     <AppWrapper>
       <div className="h-full">
-        <Outlet />
+        <div className="block">
+          <ChatList />
+        </div>
+        <div>
+          <Outlet />
+        </div>
       </div>
     </AppWrapper>
   );

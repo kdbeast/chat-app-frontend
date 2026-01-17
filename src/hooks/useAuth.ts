@@ -1,4 +1,4 @@
-import axios from "axios";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { toast } from "sonner";
 import { create } from "zustand";
 import { useSocket } from "./useSocket";
@@ -33,12 +33,8 @@ export const useAuth = create<AuthState>()(
           set({ user: response.data.user });
           useSocket.getState().connectSocket();
           toast.success("Registration successful");
-        } catch (error: unknown) {
-          if (axios.isAxiosError(error)) {
-            toast.error(error.response?.data.message);
-          } else {
-            toast.error("Registration failed");
-          }
+        } catch (error: any) {
+          toast.error(error.response?.data.message || "Registration failed");
         } finally {
           set({ isSigningUp: false });
         }
@@ -51,12 +47,8 @@ export const useAuth = create<AuthState>()(
           set({ user: response.data.user });
           useSocket.getState().connectSocket();
           toast.success("Login successful");
-        } catch (error: unknown) {
-          if (axios.isAxiosError(error)) {
-            toast.error(error.response?.data.message);
-          } else {
-            toast.error("Login failed");
-          }
+        } catch (error: any) {
+          toast.error(error.response?.data.message || "Login failed");
         } finally {
           set({ isLoggingIn: false });
         }
@@ -69,12 +61,8 @@ export const useAuth = create<AuthState>()(
           set({ user: null });
           useSocket.getState().disconnectSocket();
           toast.success("Logout successful");
-        } catch (error: unknown) {
-          if (axios.isAxiosError(error)) {
-            toast.error(error.response?.data.message);
-          } else {
-            toast.error("Logout failed");
-          }
+        } catch (error: any) {
+          toast.error(error.response?.data.message || "Logout failed");
         }
       },
 
@@ -84,12 +72,8 @@ export const useAuth = create<AuthState>()(
           const response = await API.get("/auth/status");
           set({ user: response.data.user });
           useSocket.getState().connectSocket();
-        } catch (error: unknown) {
-          if (axios.isAxiosError(error)) {
-            toast.error(error.response?.data.message);
-          } else {
-            toast.error("Authentication Failed");
-          }
+        } catch (error: any) {
+          toast.error(error.response?.data.message || "Authentication Failed");
         } finally {
           set({ isAuthStatusLoading: false });
         }
