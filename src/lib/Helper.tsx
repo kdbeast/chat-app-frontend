@@ -10,14 +10,14 @@ export const isUserOnline = (userId?: string) => {
 
 export const getOtherUserAndGroup = (
   chat: ChatType,
-  currentUserId: string | null
+  currentUserId: string | null,
 ) => {
   const isGroup = chat?.isGroup;
 
   if (isGroup) {
     return {
       name: chat.groupName || "Unnamed Group",
-      subHeading: `${chat.participants.length} members`,
+      subheading: `${chat.participants.length} members`,
       avatar: "",
       isGroup,
     };
@@ -28,7 +28,7 @@ export const getOtherUserAndGroup = (
 
   return {
     name: other?.name || "Unnamed User",
-    subHeading: isOnline ? "Online" : "Offline",
+    subheading: isOnline ? "Online" : "Offline",
     avatar: other?.avatar || "",
     isGroup: false,
     isOnline,

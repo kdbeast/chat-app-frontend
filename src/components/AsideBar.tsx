@@ -34,7 +34,7 @@ const AsideBar = () => {
       >
         <Logo
           url={PROTECTED_ROUTES.CHAT}
-          imgClass="size-7"
+          imgClass="size-7 rounded-full mt-2"
           textClass="text-white"
           showText={false}
         />

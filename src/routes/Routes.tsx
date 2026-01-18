@@ -11,7 +11,7 @@ export const AUTH_ROUTES = {
 
 export const PROTECTED_ROUTES = {
   CHAT: "/chat",
-  SINGLE_CHAT: "/chat/:id",
+  SINGLE_CHAT: "/chat/:chatId",
 };
 
 export const authRoutesPaths = [
