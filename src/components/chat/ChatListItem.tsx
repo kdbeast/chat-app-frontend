@@ -19,7 +19,7 @@ const ChatListItem = ({ chat, currentUserId, onClick }: PropsType) => {
   );
 
   const getLastMessageText = () => {
-    if (!lastMessage) {
+    if (!lastMessage || !lastMessage.content) {
       return isGroup
         ? chat.createdBy === currentUserId
           ? "Group created"

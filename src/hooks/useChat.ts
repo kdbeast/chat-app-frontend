@@ -22,9 +22,9 @@ interface ChatState {
   fetchAllUsers: () => void;
   fetchSingleChat: (chatId: string) => void;
   createChat: (payload: CreateChatType) => Promise<ChatType | null>;
-  updateChatLastMessage: (chatId: string, message: MessageType) => void;
-  
+
   addNewChat: (newChat: ChatType) => void;
+  updateChatLastMessage: (chatId: string, message: MessageType) => void;
 }
 
 export const useChat = create<ChatState>((set, get) => ({
@@ -91,7 +91,7 @@ export const useChat = create<ChatState>((set, get) => ({
   addNewChat: (newChat: ChatType) => {
     set((state) => {
       const existingChatIndex = state.chats.findIndex(
-        (chat) => chat._id === newChat._id
+        (chat) => chat._id === newChat._id,
       );
       if (existingChatIndex !== -1) {
         return {
@@ -105,23 +105,21 @@ export const useChat = create<ChatState>((set, get) => ({
     });
   },
 
-  updateChatLastMessage: (chatId: string, message: MessageType) => {
+  updateChatLastMessage: (chatId: string, lastMessage) => {
     set((state) => {
-      const existingChatIndex = state.chats.findIndex(
-        (chat) => chat._id === chatId
-      );
-      if (existingChatIndex !== -1) {
+      const chat = state.chats.find((chat) => chat._id === chatId);
+      if (chat) {
         return {
           chats: [
             {
-              ...state.chats[existingChatIndex],
-              lastMessage: message,
+              ...chat,
+              lastMessage: lastMessage,
             },
             ...state.chats.filter((chat) => chat._id !== chatId),
           ],
         };
       }
-      return { chats: [state.chats[0], ...state.chats] };
+      return { chats: [...state.chats] };
     });
   },
 }));
