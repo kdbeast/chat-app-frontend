@@ -8,14 +8,13 @@ import { Spinner } from "@/components/ui/spinner";
 import ChatBody from "@/components/chat/ChatBody";
 import type { MessageType } from "@/types/chat.type";
 import ChatHeader from "@/components/chat/ChatHeader";
+import ChatFooter from "@/components/chat/ChatFooter";
 
 const SingleChat = () => {
   const chatId = useChatId();
   const { user } = useAuth();
   const { socket } = useSocket();
   const { fetchSingleChat, isSingleChatLoading, singleChat } = useChat();
-
-  console.log("singleChat", singleChat);
 
   const [replyTo, setReplyTo] = useState<MessageType | null>(null);
 
@@ -68,12 +67,12 @@ const SingleChat = () => {
         )}
       </div>
 
-      {/* <ChatFooter
+      <ChatFooter
         replyTo={replyTo}
         chatId={chatId}
         currentUserId={currentUserId}
         onCancelReply={() => setReplyTo(null)}
-      /> */}
+      />
     </div>
   );
 };

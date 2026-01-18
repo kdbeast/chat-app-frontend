@@ -15,10 +15,13 @@ const ChatListItem = ({ chat, currentUserId, onClick }: PropsType) => {
 
   const { name, avatar, isOnline, isGroup } = getOtherUserAndGroup(
     chat,
-    currentUserId
+    currentUserId,
   );
 
   const getLastMessageText = () => {
+    // Check for image first (message could have image without text)
+    if (lastMessage?.image) return "📷 Photo";
+
     if (!lastMessage || !lastMessage.content) {
       return isGroup
         ? chat.createdBy === currentUserId
@@ -26,7 +29,6 @@ const ChatListItem = ({ chat, currentUserId, onClick }: PropsType) => {
           : "You were added"
         : "Send a message";
     }
-    if (lastMessage.image) return "📷 Photo";
 
     if (isGroup && lastMessage.sender) {
       return `${
@@ -45,7 +47,7 @@ const ChatListItem = ({ chat, currentUserId, onClick }: PropsType) => {
       className={cn(
         `w-full flex items-center gap-2 p-2 rounded-sm
          hover:bg-sidebar-accent transition-colors text-left`,
-        pathname.includes(chat._id) && "bg-sidebar-accent!"
+        pathname.includes(chat._id) && "bg-sidebar-accent!",
       )}
     >
       <AvatarWithBadge

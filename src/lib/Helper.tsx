@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { useSocket } from "@/hooks/useSocket";
 import type { ChatType } from "@/types/chat.type";
 import { format, isThisWeek, isToday, isYesterday } from "date-fns";
@@ -47,3 +48,7 @@ export const formatChatTime = (date: string | Date) => {
 
   return format(newDate, "M/d");
 };
+
+export function generateUUID(): string {
+  return uuidv4();
+}
