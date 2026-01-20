@@ -3,6 +3,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "../ui/input-group";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
 import { Checkbox } from "../ui/checkbox";
@@ -16,15 +17,25 @@ import { ArrowLeft, PenBoxIcon, Search, UsersIcon } from "lucide-react";
 
 export const NewChatPopover = memo(() => {
   const navigate = useNavigate();
-  const { fetchAllUsers, users, isUsersLoading, createChat, isCreatingChat } =
-    useChat();
+  const {
+    fetchAllUsers,
+    users,
+    isUsersLoading,
+    createChat,
+    isCreatingChat,
+    chats,
+  } = useChat();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isGroupMode, setIsGroupMode] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-
+  const [searchQuery, setSearchQuery] = useState("");
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
+
+  const filteredUsers = users?.filter((user) =>
+    user.name?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   useEffect(() => {
     fetchAllUsers();
@@ -32,7 +43,9 @@ export const NewChatPopover = memo(() => {
 
   const toggleUserSelection = (id: string) => {
     setSelectedUsers((prev) =>
-      prev.includes(id) ? prev.filter((userId) => userId !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter((userId) => userId !== id)
+        : [...prev, id],
     );
   };
 
@@ -44,6 +57,7 @@ export const NewChatPopover = memo(() => {
     setIsGroupMode(false);
     setGroupName("");
     setSelectedUsers([]);
+    setSearchQuery("");
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -64,6 +78,22 @@ export const NewChatPopover = memo(() => {
   };
 
   const handleCreateChat = async (userId: string) => {
+    // Check if a 1:1 chat already exists with this user
+    const existingChat = chats.find(
+      (chat) =>
+        !chat.isGroup && chat.participants.some((p) => p._id === userId),
+    );
+
+    if (existingChat) {
+      // Chat already exists, navigate to it
+      setIsOpen(false);
+      resetState();
+      navigate(`/chat/${existingChat._id}`);
+      toast.info("Chat already exists");
+      return;
+    }
+
+    // Create new chat if it doesn't exist
     setLoadingUserId(userId);
     try {
       const response = await createChat({
@@ -113,9 +143,11 @@ export const NewChatPopover = memo(() => {
 
           <InputGroup>
             <InputGroupInput
-              value={isGroupMode ? groupName : ""}
-              onChange={
-                isGroupMode ? (e) => setGroupName(e.target.value) : undefined
+              value={isGroupMode ? groupName : searchQuery}
+              onChange={(e) =>
+                isGroupMode
+                  ? setGroupName(e.target.value)
+                  : setSearchQuery(e.target.value)
               }
               placeholder={isGroupMode ? "Enter group name" : "Search name"}
             />
@@ -132,7 +164,7 @@ export const NewChatPopover = memo(() => {
         >
           {isUsersLoading ? (
             <Spinner className="w-6 h-6" />
-          ) : users && users?.length === 0 ? (
+          ) : filteredUsers && filteredUsers?.length === 0 ? (
             <div className="text-center text-muted-foreground">
               No users found
             </div>
@@ -142,7 +174,8 @@ export const NewChatPopover = memo(() => {
                 disabled={isCreatingChat}
                 onClick={() => setIsGroupMode(true)}
               />
-              {users?.map((user) => (
+
+              {filteredUsers?.map((user) => (
                 <ChatUserItem
                   key={user._id}
                   user={user}
@@ -153,7 +186,7 @@ export const NewChatPopover = memo(() => {
               ))}
             </>
           ) : (
-            users?.map((user) => (
+            filteredUsers?.map((user) => (
               <GroupUserItem
                 key={user._id}
                 user={user}
@@ -190,7 +223,14 @@ const UserAvatar = memo(({ user }: { user: UserType }) => (
   <>
     <AvatarWithBadge name={user.name} src={user.avatar ?? ""} />
     <div className="flex-1 min-w-0">
-      <h5 className="text-[13.5px] font-medium truncate">{user.name}</h5>
+      <div className="flex items-center gap-2">
+        <h5 className="text-[13.5px] font-medium truncate">{user.name}</h5>
+        {user.isAI && (
+          <span className="bg-primary/10 text-primary text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+            AI
+          </span>
+        )}
+      </div>
       <p className="text-xs text-muted-foreground">
         Hey there! I'm using talk bridge
       </p>
@@ -214,7 +254,7 @@ const NewGroupItem = memo(
       </div>
       <span>New Group</span>
     </button>
-  )
+  ),
 );
 NewGroupItem.displayName = "NewGroupItem";
 
@@ -241,7 +281,7 @@ const ChatUserItem = memo(
       <UserAvatar user={user} />
       {isLoading && <Spinner className="absolute right-2 w-4 h-4 ml-auto" />}
     </button>
-  )
+  ),
 );
 ChatUserItem.displayName = "ChatUserItem";
 
@@ -268,6 +308,6 @@ const GroupUserItem = memo(
         onCheckedChange={() => onToggle(user._id)}
       />
     </label>
-  )
+  ),
 );
 GroupUserItem.displayName = "GroupUserItem";

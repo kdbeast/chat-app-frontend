@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useChat } from "@/hooks/useChat";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSocket } from "@/hooks/useSocket";
 import ChatBodyMessage from "./ChatBodyMessage";
 import type { MessageType } from "@/types/chat.type";
@@ -11,8 +13,9 @@ interface Props {
 }
 const ChatBody = ({ chatId, messages, onReply }: Props) => {
   const { socket } = useSocket();
-  const { addNewMessage } = useChat();
+  const { addNewMessage, addOrUpdateMessage } = useChat();
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const [_, setAiChunks] = useState<string>("");
 
   useEffect(() => {
     if (!chatId) return;
@@ -27,9 +30,53 @@ const ChatBody = ({ chatId, messages, onReply }: Props) => {
   }, [socket, chatId, addNewMessage]);
 
   useEffect(() => {
+    if (!chatId) return;
+    if (!socket) return;
+    const handleAIStream = ({
+      chatId: streamChatId,
+      chunk,
+      done,
+      message,
+    }: any) => {
+      if (chatId !== streamChatId) return;
+      const lastMsg = messages.at(-1);
+      if (!lastMsg?._id && lastMsg?.streaming) return;
+
+      if (chunk && chunk.trim() && !done) {
+        setAiChunks((prev) => {
+          const newContent = prev + chunk;
+          addOrUpdateMessage(
+            chatId,
+            {
+              ...lastMsg,
+              content: newContent,
+            } as MessageType,
+            lastMsg?._id,
+          );
+          return newContent;
+        });
+        return;
+      }
+
+      if (done) {
+        console.log("AI Stream Done 👨🏻‍💻", message);
+        setAiChunks("");
+      }
+    };
+
+    socket.on("chat:ai", handleAIStream);
+    return () => {
+      socket.off("chat:ai", handleAIStream);
+    };
+  }, [socket, chatId, messages, addOrUpdateMessage]);
+
+  useEffect(() => {
     if (!messages.length) return;
+    const lastMsg = messages[messages.length - 1];
+    const isStreaming = lastMsg?.streaming;
+
     bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
+      behavior: isStreaming ? "auto" : "smooth",
     });
   }, [messages]);
 

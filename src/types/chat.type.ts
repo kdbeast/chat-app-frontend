@@ -5,7 +5,7 @@ export type ChatType = {
   lastMessage: MessageType;
   participants: UserType[];
   isGroup: boolean;
-  isAiChat: boolean;
+  isAIChat: boolean;
   createdBy: string;
   groupName?: string;
   createdAt: string;

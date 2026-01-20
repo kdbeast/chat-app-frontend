@@ -3,7 +3,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { ReplyIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { Response } from "../ui/ai-response";
 import { formatChatTime } from "@/lib/Helper";
+import { RiCircleFill } from "@remixicon/react";
 import AvatarWithBadge from "../AvatarWithBadge";
 import type { MessageType } from "@/types/chat.type";
 
@@ -97,7 +99,13 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
               />
             )}
 
-            {message.content && <p>{message.content}</p>}
+            {message.content && <Response>{message.content}</Response>}
+
+            {message?.streaming && (
+              <span>
+                <RiCircleFill className="w-4 h-4 animate-bounce rounded-full dark:text-white mt-1" />
+              </span>
+            )}
           </div>
 
           {/* {Reply Icon Button} */}

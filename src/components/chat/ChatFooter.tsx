@@ -13,12 +13,14 @@ import { Form, FormField, FormItem } from "../ui/form";
 
 interface Props {
   chatId: string | null;
+  isAIChat: boolean;
   currentUserId: string | null;
   replyTo: MessageType | null;
   onCancelReply: () => void;
 }
 const ChatFooter = ({
   chatId,
+  isAIChat,
   currentUserId,
   replyTo,
   onCancelReply,
@@ -27,7 +29,7 @@ const ChatFooter = ({
     message: z.string().optional(),
   });
 
-  const { sendMessage, isSendingMsg } = useChat();
+  const { sendMessage, isSendingMessage } = useChat();
 
   const [image, setImage] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
@@ -58,7 +60,7 @@ const ChatFooter = ({
   };
 
   const onSubmit = (values: { message?: string }) => {
-    if (isSendingMsg) return;
+    if (isSendingMessage) return;
     if (!values.message?.trim() && !image) {
       toast.error("Please enter a message or select an image");
       return;
@@ -70,7 +72,7 @@ const ChatFooter = ({
       replyTo: replyTo,
     };
     //Send Message
-    sendMessage(payload);
+    sendMessage(payload, isAIChat);
 
     onCancelReply();
     handleRemoveImage();
@@ -84,7 +86,7 @@ const ChatFooter = ({
        bg-card border-t border-border py-4
       "
       >
-        {image && !isSendingMsg && (
+        {image && !isSendingMessage && (
           <div className="max-w-6xl mx-auto px-8.5">
             <div className="relative w-fit">
               <img
@@ -119,7 +121,7 @@ const ChatFooter = ({
                 type="button"
                 variant="outline"
                 size="icon"
-                disabled={isSendingMsg}
+                disabled={isSendingMessage}
                 className="rounded-full"
                 onClick={() => imageInputRef.current?.click()}
               >
@@ -129,7 +131,7 @@ const ChatFooter = ({
                 type="file"
                 className="hidden"
                 accept="image/*"
-                disabled={isSendingMsg}
+                disabled={isSendingMessage}
                 ref={imageInputRef}
                 onChange={handleImageChange}
               />
@@ -137,7 +139,7 @@ const ChatFooter = ({
             <FormField
               control={form.control}
               name="message"
-              disabled={isSendingMsg}
+              disabled={isSendingMessage}
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <Input
@@ -154,7 +156,7 @@ const ChatFooter = ({
               type="submit"
               size="icon"
               className="rounded-lg"
-              disabled={isSendingMsg}
+              disabled={isSendingMessage}
             >
               <Send className="h-3.5 w-3.5" />
             </Button>
@@ -162,7 +164,7 @@ const ChatFooter = ({
         </Form>
       </div>
 
-      {replyTo && !isSendingMsg && (
+      {replyTo && !isSendingMessage && (
         <ChatReplyBar
           replyTo={replyTo}
           currentUserId={currentUserId}

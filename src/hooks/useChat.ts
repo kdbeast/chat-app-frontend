@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
-import type { UserType } from "@/types/auth.type";
 import type {
   ChatType,
   CreateChatType,
   CreateMessageType,
   MessageType,
 } from "@/types/chat.type";
-import { API } from "@/lib/axiosClient";
 import { toast } from "sonner";
 import { useAuth } from "./useAuth";
+import { API } from "@/lib/axiosClient";
 import { generateUUID } from "@/lib/Helper";
+import type { UserType } from "@/types/auth.type";
 
 interface ChatState {
   chats: ChatType[];
@@ -24,16 +24,23 @@ interface ChatState {
   isUsersLoading: boolean;
   isCreatingChat: boolean;
   isSingleChatLoading: boolean;
+  isSendingMessage: boolean;
 
   fetchChats: () => void;
   fetchAllUsers: () => void;
   fetchSingleChat: (chatId: string) => void;
-  sendMessage: (payload: CreateMessageType) => void;
+  sendMessage: (payload: CreateMessageType, isAIChat?: boolean) => void;
   createChat: (payload: CreateChatType) => Promise<ChatType | null>;
 
   addNewChat: (newChat: ChatType) => void;
   addNewMessage: (chatId: string, message: MessageType) => void;
   updateChatLastMessage: (chatId: string, message: MessageType) => void;
+
+  addOrUpdateMessage: (
+    chatId: string,
+    msg: MessageType,
+    tempId?: string,
+  ) => void;
 }
 
 export const useChat = create<ChatState>((set, get) => ({
@@ -45,6 +52,7 @@ export const useChat = create<ChatState>((set, get) => ({
   isUsersLoading: false,
   isCreatingChat: false,
   isSingleChatLoading: false,
+  isSendingMessage: false,
 
   fetchAllUsers: async () => {
     set({ isUsersLoading: true });
@@ -58,63 +66,68 @@ export const useChat = create<ChatState>((set, get) => ({
     }
   },
 
-  sendMessage: async (payload: CreateMessageType) => {
-    const { chatId, replyTo, content, image } = payload;
+  sendMessage: async (payload: CreateMessageType, isAIChat?: boolean) => {
+    set({ isSendingMessage: true });
     const { user } = useAuth.getState();
+    const chat = get().singleChat?.chat;
+    const { chatId, replyTo, content, image } = payload;
+    const aiSender = chat?.participants.find((p) => p.isAI);
+
     if (!chatId || !user?._id) return;
 
-    const tempMsgId = generateUUID();
+    const tempUserId = generateUUID();
+    const tempAIId = generateUUID();
+
     const tempMessage = {
       content: content || "",
       chatId,
       sender: user,
-      _id: tempMsgId,
+      _id: tempUserId,
       replyTo: replyTo || null,
       image: image || null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      status: "sending...",
+      status: !isAIChat ? "sending..." : "",
     };
-    set((state) => {
-      if (state.singleChat?.chat._id === chatId) {
-        return {
-          singleChat: {
-            ...state.singleChat,
-            messages: [...state.singleChat.messages, tempMessage],
-          },
-        };
-      }
-      return state;
-    });
+    get().addOrUpdateMessage(chatId, tempMessage, tempUserId);
+
+    if (isAIChat && aiSender) {
+      const tempAIMessage = {
+        _id: tempAIId,
+        content: "",
+        chatId,
+        sender: aiSender,
+        replyTo: null,
+        image: null,
+        streaming: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: "waiting...",
+      };
+      get().addOrUpdateMessage(chatId, tempAIMessage, tempAIId);
+    }
 
     try {
       const { data } = await API.post(`/chat/message/send`, {
         chatId,
         content,
         image,
-        replyTo,
-      });
-      const { userMessage } = data;
-
-      set((state) => {
-        if (!state.singleChat) return state;
-        return {
-          singleChat: {
-            ...state.singleChat,
-            messages: state.singleChat.messages.map((msg) => {
-              if (msg._id === tempMsgId) {
-                return userMessage;
-              }
-              return msg;
-            }),
-          },
-        };
+        replyToId: replyTo?._id,
       });
 
-      // Also update the chat list's lastMessage
-      get().updateChatLastMessage(chatId, userMessage);
+      const { userMessage, aiResponse } = data;
+
+      get().addOrUpdateMessage(chatId, userMessage, tempUserId);
+
+      if (isAIChat && aiResponse) {
+        get().addOrUpdateMessage(chatId, aiResponse, tempAIId);
+      }
     } catch (error: any) {
+      console.log("Error occurred:", error);
+
       toast.error(error?.response?.data?.message || "Failed to send message");
+    } finally {
+      set({ isSendingMessage: false });
     }
   },
 
@@ -203,5 +216,24 @@ export const useChat = create<ChatState>((set, get) => ({
       });
     }
     return { singleChat: null };
+  },
+
+  addOrUpdateMessage: (chatId: string, msg: MessageType, tempId?: string) => {
+    const singleChat = get().singleChat;
+    if (!singleChat || singleChat?.chat._id !== chatId) return;
+
+    const messages = singleChat.messages;
+    const messageIndex = messages.findIndex(
+      (m) => m._id === tempId || m._id === msg._id,
+    );
+
+    let updatedMessages;
+    if (messageIndex !== -1) {
+      updatedMessages = messages.map((m, i) => (i === messageIndex ? msg : m));
+    } else {
+      updatedMessages = [...messages, msg];
+    }
+
+    set({ singleChat: { ...singleChat, messages: updatedMessages } });
   },
 }));
