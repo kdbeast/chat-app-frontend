@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/refs */
 import { z } from "zod";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
@@ -139,7 +140,7 @@ const ChatFooter = ({
             <FormField
               control={form.control}
               name="message"
-              disabled={isSendingMessage}
+              disabled={isSendingMessage && !replyTo}
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <Input

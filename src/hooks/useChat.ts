@@ -90,6 +90,7 @@ export const useChat = create<ChatState>((set, get) => ({
       status: !isAIChat ? "sending..." : "",
     };
     get().addOrUpdateMessage(chatId, tempMessage, tempUserId);
+    get().updateChatLastMessage(chatId, tempMessage);
 
     if (isAIChat && aiSender) {
       const tempAIMessage = {
@@ -118,9 +119,11 @@ export const useChat = create<ChatState>((set, get) => ({
       const { userMessage, aiResponse } = data;
 
       get().addOrUpdateMessage(chatId, userMessage, tempUserId);
+      get().updateChatLastMessage(chatId, userMessage);
 
       if (isAIChat && aiResponse) {
         get().addOrUpdateMessage(chatId, aiResponse, tempAIId);
+        get().updateChatLastMessage(chatId, aiResponse);
       }
     } catch (error: any) {
       console.log("Error occurred:", error);

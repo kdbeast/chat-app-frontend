@@ -19,10 +19,7 @@ const ChatListItem = ({ chat, currentUserId, onClick }: PropsType) => {
   );
 
   const getLastMessageText = () => {
-    // Check for image first (message could have image without text)
-    if (lastMessage?.image) return "📷 Photo";
-
-    if (!lastMessage || !lastMessage.content) {
+    if (!lastMessage) {
       return isGroup
         ? chat.createdBy === currentUserId
           ? "Group created"
@@ -30,15 +27,20 @@ const ChatListItem = ({ chat, currentUserId, onClick }: PropsType) => {
         : "Send a message";
     }
 
-    if (isGroup && lastMessage.sender) {
-      return `${
-        lastMessage.sender._id === currentUserId
-          ? "You"
-          : lastMessage.sender.name
-      }: ${lastMessage.content}`;
+    const isMe = lastMessage.sender?._id === currentUserId;
+    const senderName = isMe ? "You" : lastMessage.sender?.name || "User";
+
+    let messageText = "";
+    if (lastMessage.image) {
+      messageText = "📷 Photo";
+      if (lastMessage.content) {
+        messageText += `: ${lastMessage.content}`;
+      }
+    } else {
+      messageText = lastMessage.content || "";
     }
 
-    return lastMessage.content;
+    return `${senderName}: ${messageText}`;
   };
 
   return (
