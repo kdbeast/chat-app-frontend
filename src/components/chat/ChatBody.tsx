@@ -36,7 +36,6 @@ const ChatBody = ({ chatId, messages, onReply }: Props) => {
       chatId: streamChatId,
       chunk,
       done,
-      message,
     }: any) => {
       if (chatId !== streamChatId) return;
       const lastMsg = messages.at(-1);
