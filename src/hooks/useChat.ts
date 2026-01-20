@@ -126,8 +126,6 @@ export const useChat = create<ChatState>((set, get) => ({
         get().updateChatLastMessage(chatId, aiResponse);
       }
     } catch (error: any) {
-      console.log("Error occurred:", error);
-
       toast.error(error?.response?.data?.message || "Failed to send message");
     } finally {
       set({ isSendingMessage: false });

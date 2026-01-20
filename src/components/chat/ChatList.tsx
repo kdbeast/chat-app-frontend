@@ -43,7 +43,6 @@ const ChatList = () => {
     if (!socket) return;
 
     const handleNewChat = (newChat: ChatType) => {
-      console.log("Recieved new chat", newChat);
       addNewChat(newChat);
     };
 

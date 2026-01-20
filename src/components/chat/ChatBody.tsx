@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useChat } from "@/hooks/useChat";
-import { useEffect, useRef, useState } from "react";
 import { useSocket } from "@/hooks/useSocket";
 import ChatBodyMessage from "./ChatBodyMessage";
+import { useEffect, useRef, useState } from "react";
 import type { MessageType } from "@/types/chat.type";
 
 interface Props {
@@ -59,7 +59,6 @@ const ChatBody = ({ chatId, messages, onReply }: Props) => {
       }
 
       if (done) {
-        console.log("AI Stream Done 👨🏻‍💻", message);
         setAiChunks("");
       }
     };

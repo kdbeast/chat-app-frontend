@@ -26,11 +26,9 @@ export const useSocket = create<SocketState>()((set, get) => ({
     set({ socket: newSocket });
 
     newSocket.on("connect", () => {
-      console.log("Connected to socket", newSocket.id);
     });
 
     newSocket.on("onlineUsers", (userIds) => {
-      console.log("Online users", userIds);
       set({ onlineUsers: userIds });
     });
   },
